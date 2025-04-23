@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.10)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+project(big103html VERSION 2.0)
+file(GLOB_RECURSE SRC_FILES src/*.cpp)
+
+find_package(SFML COMPONENTS network audio graphics window system REQUIRED)
+add_executable(big103html ${SRC_FILES})
+target_link_libraries(big103html sfml-network sfml-audio sfml-graphics sfml-window sfml-system CURL::libcurl)
+
+find_package(CURL REQUIRED)
