@@ -26,15 +26,15 @@ bool isOnBusRide() {
 
     if (!isWednesday) {
         // Regular schedule
-        if ((hour == 6 && minute >= 45) || (hour == 7 && minute <= 38) ||
-            ((hour == 14 && minute >= 35) || (hour == 15 && minute <= 25))&&(!isTuesday)) {
+        if ((hour == 6 && minute >= 45) || (hour == 7 && minute <= 34) ||
+            ((hour == 14 && minute >= 30) || (hour == 15 && minute <= 20))&&(!isTuesday)) {
             return true;
         }
     }
     else {
         // Late Start
-        if ((hour == 7 && minute >= 45) || (hour == 8 && minute <= 38) ||
-            (hour == 14 && minute >= 35) || (hour == 15 && minute <= 25)) {
+        if ((hour == 7 && minute >= 45) || (hour == 8 && minute <= 34) ||
+            (hour == 14 && minute >= 30) || (hour == 15 && minute <= 20)) {
             return true;
         }
     }
