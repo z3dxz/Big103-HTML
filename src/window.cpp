@@ -1,6 +1,5 @@
 
 #include <thread>
-#include <windows.h>
 #include "big103.h"
 
 #ifdef _WIN32
