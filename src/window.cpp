@@ -248,7 +248,7 @@ int main() {
     std::string title = "Big103-HTML for Unix";
 
     #ifdef _WIN32
-    title = "Big103-HTML for Windows";
+    title = "Big103-HTML for Windows Systems";
     #endif
 
     sf::RenderWindow window(sf::VideoMode(defwidth, defheight), "Big103-HTML for Windows", sf::Style::Default);
