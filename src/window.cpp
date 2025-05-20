@@ -248,10 +248,10 @@ int main() {
     std::string title = "Big103-HTML for Unix";
 
     #ifdef _WIN32
-    title = "Big103-HTML for Windows Systems";
+    title = "Big103-HTML for Windows";
     #endif
 
-    sf::RenderWindow window(sf::VideoMode(defwidth, defheight), "Big103-HTML for Windows", sf::Style::Default);
+    sf::RenderWindow window(sf::VideoMode(defwidth, defheight), title.c_str(), sf::Style::Default);
    
     
 	// Poll Events
