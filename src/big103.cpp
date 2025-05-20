@@ -11,7 +11,13 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* out
 bool isOnBusRide() {
     time_t now = time(0);
     tm localTime;
+
+    #ifdef _WIN32
     localtime_s(&localTime, &now);
+    #else
+    localtime_r(&now, &localTime);
+
+    #endif
 
     int hour = localTime.tm_hour;
     int minute = localTime.tm_min;
@@ -399,7 +405,6 @@ void notify() {
         sf::sleep(sf::seconds(3));
     }
     else {
-        Beep(5000, 500);
         std::cout << "Failed to play";
     }
 }
