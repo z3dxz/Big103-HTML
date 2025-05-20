@@ -3,6 +3,10 @@
 #include <windows.h>
 #include "big103.h"
 
+#ifdef _WIN32
+#include "titlebar.h"
+#endif
+
 sf::Text ns_txt;
 sf::Text title_field;
 sf::Text artist_field;
@@ -239,17 +243,16 @@ void newsongcomeson(std::string picture) {
     }
 }
 
-
-
-#ifdef _DEBUG
 int main() {
-#else 
-    int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd) {
-#endif
 
     a_art = new sf::Texture();
     sf::RenderWindow window(sf::VideoMode(defwidth, defheight), "Big103-HTML for Windows", sf::Style::Default);
    
+    
+	// Poll Events
+	#ifdef _WIN32
+	SetTitlebarDark(window);
+	#endif
 
     window.setFramerateLimit(60);
     
