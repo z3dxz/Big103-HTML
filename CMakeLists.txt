@@ -7,6 +7,7 @@ project(big103html VERSION 2.0)
 find_package(SFML COMPONENTS network audio graphics window system REQUIRED)
 
 configure_file(res/CascadiaCode.ttf font.ttf COPYONLY)
+configure_file(res/babafixed.wav babafixed.wav COPYONLY)
 
 if (WIN32)
 
