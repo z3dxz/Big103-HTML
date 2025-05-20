@@ -245,6 +245,12 @@ void newsongcomeson(std::string picture) {
 int main() {
 
     a_art = new sf::Texture();
+    std::string title = "Big103-HTML for POSIX";
+
+    #ifdef _WIN32
+    title = "Big103-HTML for Windows";
+    #endif
+
     sf::RenderWindow window(sf::VideoMode(defwidth, defheight), "Big103-HTML for Windows", sf::Style::Default);
    
     
