@@ -13,5 +13,5 @@ The discord webhook URL is hard-coded for now and would need to be changed.
 
 ## Dependencies
 
-SFML
+SFML 2.6.2
 Libcurl
