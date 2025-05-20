@@ -262,7 +262,7 @@ int main() {
     window.setFramerateLimit(60);
     
     sf::Font font;
-    if (!font.loadFromFile("C:\\Windows\\Fonts\\CascadiaCode.ttf"))
+    if (!font.loadFromFile("font.ttf"))
     {
         printf("no");
     }
