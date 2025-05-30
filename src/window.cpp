@@ -60,128 +60,15 @@ void SetScale(float scale) {
     albumart.setSize(sf::Vector2f((int)(110.0f*scale), (int)(110.0f * scale)));
 }
 
-// GLSL SHADER: https://www.shadertoy.com/view/4ljGD1 CREDI GOES TO ADOB
-const std::string fragmentShaderCode = R"(
-uniform sampler2D iChannel0;
-uniform vec2 iResolution;
-uniform float iTime;
+const std::string bkShader = R"(
 
-float squared(float value) { return value * value; }
-
-float getAmp(float frequency) { return texture2D(iChannel0, vec2(frequency / 512.0, 0.0)).x; }
-
-float getWeight(float f) {
-    return (getAmp(f - 2.0) + getAmp(f - 1.0) + getAmp(f + 2.0) + getAmp(f + 1.0) + getAmp(f)) / 5.0;
-}
-
-void main()
-{    
-    vec2 fragCoord = gl_FragCoord.xy;
-    vec2 uvTrue = fragCoord.xy / iResolution.xy;
-    vec2 uv = -1.0 + 2.0 * uvTrue;
-    
-    float lineIntensity;
-    float glowWidth;
-    vec3 color = vec3(0.0);
-    
-    for(float i = 0.0; i < 5.0; i++) {
-        
-        uv.y += (0.2 * sin(uv.x + i / 7.0 - iTime * 0.6));
-        float Y = uv.y + getWeight(squared(i) * 20.0) *
-            (texture2D(iChannel0, vec2(uvTrue.x, 1.0)).x - 0.5);
-        lineIntensity = 0.4 + squared(1.6 * abs(mod(uvTrue.x + i / 1.3 + iTime, 2.0) - 1.0));
-        glowWidth = abs(lineIntensity / (100.0 * Y));
-        color += vec3(glowWidth * (2.0 + sin(iTime * 0.13)),
-                      glowWidth * (2.0 - sin(iTime * 0.23)),
-                      glowWidth * (2.0 - cos(iTime * 0.19)));
-    }    
-    
-    gl_FragColor = vec4(color, 1.0) * .4;
-}
-)";
-
-const std::string test2 = R"(
-#version 330 core
-
-uniform vec2 iResolution;
-uniform float iTime;
-
-float opSmoothUnion( float d1, float d2, float k )
-{
-    float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
-    return mix( d2, d1, h ) - k*h*(1.0-h);
-}
-
-float sdSphere( vec3 p, float s )
-{
-    return length(p) - s;
-} 
-
-float map(vec3 p)
-{
-    float d = 2.0;
-    for (int i = 0; i < 16; i++) {
-        float fi = float(i);
-        float time = iTime * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
-        d = opSmoothUnion(
-            sdSphere(p + sin(time + fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8), mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
-            d,
-            0.4
-        );
-    }
-    return d;
-}
-
-vec3 calcNormal( in vec3 p )
-{
-    const float h = 1e-5; // or some other value
-    const vec2 k = vec2(1, -1);
-    return normalize(
-        k.xyy * map(p + k.xyy * h) + 
-        k.yyx * map(p + k.yyx * h) + 
-        k.yxy * map(p + k.yxy * h) + 
-        k.xxx * map(p + k.xxx * h)
-    );
-}
-
-void main()
-{
-    vec2 uv = gl_FragCoord.xy / iResolution;
-
-    // screen size is 6m x 6m
-    vec3 rayOri = vec3((uv - 0.5) * vec2(iResolution.x / iResolution.y, 1.0) * 6.0, 3.0);
-    vec3 rayDir = vec3(0.0, 0.0, -1.0);
-    
-    float depth = 0.0;
-    vec3 p;
-
-    for (int i = 0; i < 64; i++) {
-        p = rayOri + rayDir * depth;
-        float dist = map(p);
-        depth += dist;
-        if (dist < 1e-6) {
-            break;
-        }
-    }
-
-    depth = min(6.0, depth);
-    vec3 n = calcNormal(p);
-    float b = max(0.0, dot(n, vec3(0.577)));
-    vec3 col = (0.5 + 0.5 * cos((b + iTime * 3.0) + uv.xyx * 2.0 + vec3(0, 2, 4))) * (0.85 + b * 0.35);
-    col *= exp(-depth * 0.15);
-
-    // maximum thickness is 2m in alpha channel
-    gl_FragColor = vec4(col, 1.0 - (depth - 0.5) / 2.0);
-}
-)";
-
-const std::string fragmentShaderCode2 = R"(
-
- uniform float iTime;
+    uniform float iTime;
     const float gamma = 0.3;
+
     float gc(float cv) {
         return pow(cv, 1.0 / gamma);
     }
+
     void main()  {
         vec2 position = gl_FragCoord.xy / vec2(800.0, 600.0);
         position = (position - 0.5) * 2.0;
@@ -189,9 +76,10 @@ const std::string fragmentShaderCode2 = R"(
         float blue  = 0.2 + 0.3 * sin(iTime + position.x * 4.0 + position.y * 2.0);
         green = gc(green);
         blue = gc(blue);
-        // Set the fragment color with smooth gradient
+
         gl_FragColor = vec4(0, green, blue, 1.0);
     }
+
 )";
 
 bool load_album_art(const std::string& url, sf::Texture& texture) {
@@ -282,9 +170,9 @@ int main() {
 
 
     sf::Shader shader;
-    if (!shader.loadFromMemory(fragmentShaderCode2, sf::Shader::Fragment))
+    if (!shader.loadFromMemory(bkShader, sf::Shader::Fragment))
     {
-        std::cout << "Error loading shader" << std::endl;
+        std::cout << "Error loading shader\n" << std::endl;
         return -1;
     }
 
@@ -296,6 +184,8 @@ int main() {
     std::thread th(ExecuteThread);
 
     sf::Clock clock;
+
+    Initialize();
 
     while (window.isOpen())
     {
@@ -322,8 +212,6 @@ int main() {
 
         float time = clock.getElapsedTime().asSeconds();
         shader.setUniform("iTime", time);
-        shader.setUniform("iResolution", sf::Glsl::Vec2(window.getSize()));
-        
 
         float scale = (float)(window.getSize().y) / (float)defheight;
 

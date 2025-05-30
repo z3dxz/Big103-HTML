@@ -1,6 +1,10 @@
 #include "big103.h"
+#include <fstream>
 
-std::string sourceURL = "https://www.audacy.com/big103boston";
+// Now handled by CMake linked .txt file for customization
+
+std::string webhookURL = "Undefined";
+std::string sourceURL = "Undefined";
 
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
     size_t totalSize = size * nmemb;
@@ -49,8 +53,6 @@ bool isOnBusRide() {
 }
 
 void newsongcomeson(std::string picture);
-const char* WEBHOOKmain = "https://discord.com/api/webhooks/1162926636207968346/UIiAmkjE6C7wYw_4EPrcXbYR-GIHJbuSKweWmSjJF0svulWhkzLpJkHxacRjGfhri0Ak";
-//const char* WEBHOOKmain = "https://discord.com/api/webhooks/1319083487910694912/VpZvswc9gXRjhZ8P2TA2MFha27qvl0A-M3IsHiK9iH5X4vlwaBioUS7DnyfU4f1vIg8K"; // magic
 const char* WEBHOOKTest = "https://discord.com/api/webhooks/1205359534500085791/aaB2dZt5WsJqFDKPlwYussFN_knYTmIaZ7lk1jvJOZ7E7-N3MA2un2ZDgGtsOcmw78Qv";
 
 void webhook(std::string input, std::string input2, std::string picturefield, const char* webhookurl, bool shouldAppendNotify) {
@@ -64,7 +66,7 @@ void webhook(std::string input, std::string input2, std::string picturefield, co
     }
 
     std::string content_s = "{\"content\": \"" + input2 + "\", \"username\": \"" + input + "\", \"avatar_url\": \"" + picturefield + "\"}";
-    std::cout << "\n[][][]" << content_s << "[][][]\n";
+    
     const char* content = content_s.c_str(); //R"aw({"content": "hi!"})aw";
 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -241,13 +243,8 @@ std::string getyear(std::string song) {
         if (std::regex_search(html, match, pattern)) {
             std::string lalaWithNumbers = match[0];
             numbers = lalaWithNumbers.substr(21); // Get the four numbers
+        }
 
-            //std::cout << "Found: " << lalaWithNumbers << std::endl;
-            //std::cout << "Numbers: " << numbers << std::endl;
-        }
-        else {
-            //std::cout << "No matching pattern found." << std::endl;
-        }
         curl_easy_cleanup(curl);
     }
     curl_global_cleanup();
@@ -264,6 +261,9 @@ std::string request(std::string* atitle, std::string* aartist) {
 
         int randomNumber = std::rand();
         std::string randomString = std::to_string(randomNumber);
+        if(sourceURL == "ERROR" || sourceURL == "Undefined" || sourceURL == "") {
+            std::cout << "There is an error with the source URL: Error: " << sourceURL;
+        }
         std::string f = sourceURL + "?" + randomString;
         const char* url = f.c_str();
 
@@ -344,6 +344,9 @@ std::string requestforpicture() {
 
         int randomNumber = std::rand();
         std::string randomString = std::to_string(randomNumber);
+        if(sourceURL == "ERROR" || sourceURL == "Undefined" || sourceURL == "") {
+            std::cout << "There is an error with the source URL: Error: " << sourceURL;
+        }
         std::string k = sourceURL;
         std::string f = k + + "?" + randomString;
         const char* url = f.c_str();
@@ -394,8 +397,7 @@ int iter;
 int ips0;
 
 void notify() {
-    //PlaySound("babafixed.wav", NULL, SND_FILENAME | SND_ASYNC);
-    std::cout << "Notifying baba";
+    std::cout << "Notifying\n";
     sf::SoundBuffer buffer;
     
     if (buffer.loadFromFile("babafixed.wav")) {
@@ -405,13 +407,12 @@ void notify() {
         sf::sleep(sf::seconds(3));
     }
     else {
-        std::cout << "Failed to play";
+        std::cout << "Failed to play\n";
     }
 }
 
 void notifykind() {
-    std::cout << "Notifying kindnesskey";
-    //PlaySound("kindnesskey.wav", NULL, SND_FILENAME | SND_ASYNC);
+    std::cout << "Notifying kindnesskey\n";
     
     sf::SoundBuffer buffer;
 
@@ -422,7 +423,7 @@ void notifykind() {
         sf::sleep(sf::seconds(3));
     }
     else {
-        std::cout << "Failed to play";
+        std::cout << "Failed to play\n";
     }
     
 }
@@ -438,6 +439,79 @@ std::string picture;
 
 std::string testlast = "testlast";
 
+void SongToFile(std::string k) {
+  std::ofstream mrs;
+  std::cout << "Recording MRS..\n";
+  mrs.open("mrs.txt");
+  mrs << k.c_str();
+  mrs.close();
+}
+
+bool CheckIfSongIsInFile(std::string teststring) {
+    std::ifstream file("mrs.txt");
+    if(!file.is_open()) {
+        // Thats fine
+        std::cout << "No mrs.txt file, ignoring\n";
+        return false;
+    }
+
+    std::string txt;
+    while (getline(file, txt)) {
+        std::cout << txt << std::endl;
+    }
+    file.close();
+
+    if(txt == teststring) {
+        std::cout << "Already been logged. skipping\n";
+        return true;
+    }
+
+    return false;
+}
+
+std::string ReadWebhookURL() {
+    std::ifstream file("webhookURL.txt");
+    if(!file.is_open()) {
+        // Thats fine
+        std::cout << "No webhookURL.txt file, returning ERROR\n";
+        return "ERROR";
+    }
+
+    std::string txt;
+    while (getline(file, txt)) {
+        std::cout << txt << std::endl;
+    }
+
+    file.close();
+
+    return txt;
+}
+
+
+std::string ReadSourceURL() {
+    std::ifstream file("sourceURL.txt");
+    if(!file.is_open()) {
+        // Thats fine
+        std::cout << "No sourceURL.txt file, returning ERROR\n";
+        return "ERROR";
+    }
+
+    std::string txt;
+    while (getline(file, txt)) {
+        std::cout << txt << std::endl;
+    }
+
+    file.close();
+
+    return txt;
+}
+
+
+void Initialize(){
+    sourceURL = ReadSourceURL();
+    webhookURL = ReadWebhookURL();
+}
+
 bool PushBIG103Iteration(std::string* title, std::string* artist, int* iteration, int* ips) {
     bool didPlay = false;
     std::string k0 = request(title, artist);
@@ -449,10 +523,7 @@ bool PushBIG103Iteration(std::string* title, std::string* artist, int* iteration
 
     //||<@!1003695775047495710>||
     if (k0 != testlast) {
-
-        std::cout << ":::::::\n";
         picture = requestforpicture();
-        std::cout << picture << "\n:::::::::::::::";
         newsongcomeson(picture);
         webhook("BIG103", k0, "", WEBHOOKTest, false);
         testlast = k0;
@@ -518,7 +589,16 @@ bool PushBIG103Iteration(std::string* title, std::string* artist, int* iteration
                 found = artistfield.find(", ");
             }
             if (titlefield != last) {
-                webhook(titlefield, artistfield, picture, WEBHOOKmain, true);
+                if(!CheckIfSongIsInFile(k)) {
+                    std::cout << "Logging..";
+
+                    if(webhookURL == "ERROR" || webhookURL == "Undefined" || webhookURL == "") {
+                        std::cout << "There is an error with the webhook URL: Error: " << sourceURL;
+                    }
+
+                    webhook(titlefield, artistfield, picture, webhookURL.c_str(), true);
+                }
+                SongToFile(k);
                 last = titlefield;
             }
             requestDone = true;
