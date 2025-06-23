@@ -1,5 +1,4 @@
 #pragma once
-#define SFML_STATIC
 #include <SFML/Main.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>

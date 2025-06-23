@@ -1,9 +1,13 @@
 
 #include <thread>
+
 #include "big103.h"
 
 #ifdef _WIN32
 #include "titlebar.h"
+#include "dpi_windows.h"
+#else
+#include "dpi_linux.h"
 #endif
 
 sf::Text ns_txt;
@@ -186,6 +190,17 @@ int main() {
     sf::Clock clock;
 
     Initialize();
+
+
+    float dpi = getDPI();
+    std::cout << "Detected DPI: " << dpi << "\n";
+    float scale_dpi = ((dpi*100.0f)/96.0f)/100.0f;
+
+    sf::Vector2u s = window.getSize();
+    sf::Uint32 n_xs = (uint32_t)((float)s.x*scale_dpi);
+    sf::Uint32 n_ys = (uint32_t)((float)s.y*scale_dpi);
+
+    window.setSize({n_xs, n_ys});
 
     while (window.isOpen())
     {

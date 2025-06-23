@@ -59,7 +59,7 @@ void webhook(std::string input, std::string input2, std::string picturefield, co
     CURL* curl;
     CURLcode res;
 
-    bool ping = isOnBusRide();
+    bool ping = false;//isOnBusRide();
 
     if (ping && shouldAppendNotify) {
         input2 += " ||<@!1003695775047495710>||";
@@ -262,7 +262,7 @@ std::string request(std::string* atitle, std::string* aartist) {
         int randomNumber = std::rand();
         std::string randomString = std::to_string(randomNumber);
         if(sourceURL == "ERROR" || sourceURL == "Undefined" || sourceURL == "") {
-            std::cout << "There is an error with the source URL: Error: " << sourceURL;
+            std::cout << "There is an error with the source URL: Error: " << sourceURL << "\n";
         }
         std::string f = sourceURL + "?" + randomString;
         const char* url = f.c_str();
@@ -345,7 +345,7 @@ std::string requestforpicture() {
         int randomNumber = std::rand();
         std::string randomString = std::to_string(randomNumber);
         if(sourceURL == "ERROR" || sourceURL == "Undefined" || sourceURL == "") {
-            std::cout << "There is an error with the source URL: Error: " << sourceURL;
+            std::cout << "There is an error with the source URL: Error: " << sourceURL << "\n";
         }
         std::string k = sourceURL;
         std::string f = k + + "?" + randomString;
@@ -593,7 +593,7 @@ bool PushBIG103Iteration(std::string* title, std::string* artist, int* iteration
                     std::cout << "Logging..";
 
                     if(webhookURL == "ERROR" || webhookURL == "Undefined" || webhookURL == "") {
-                        std::cout << "There is an error with the webhook URL: Error: " << sourceURL;
+                        std::cout << "There is an error with the webhook URL: Error: " << sourceURL << "\n";
                     }
 
                     webhook(titlefield, artistfield, picture, webhookURL.c_str(), true);
