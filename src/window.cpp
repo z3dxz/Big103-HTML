@@ -1,14 +1,4 @@
-
-#include <thread>
-
-#include "big103.h"
-
-#ifdef _WIN32
-#include "titlebar.h"
-#include "dpi_windows.h"
-#else
-#include "dpi_linux.h"
-#endif
+#include "window.h"
 
 sf::Text ns_txt;
 sf::Text title_field;
@@ -26,6 +16,7 @@ int height = defheight;
 bool isRunning = true;
 
 int plays1 = 0;
+
 void ExecuteThread() {
     while (isRunning) {
         // Your thread's work here.
@@ -134,7 +125,7 @@ void newsongcomeson(std::string picture) {
     }
 }
 
-int main() {
+int CreateSFMLWindow(){
 
     a_art = new sf::Texture();
     std::string title = "Big103-HTML for Unix";
