@@ -260,6 +260,7 @@ std::string request(std::string* atitle, std::string* aartist) {
     if (curl) {
 
         int randomNumber = std::rand();
+        
         std::string randomString = std::to_string(randomNumber);
         if(sourceURL == "ERROR" || sourceURL == "Undefined" || sourceURL == "") {
             std::cout << "There is an error with the source URL: Error: " << sourceURL << "\n";
@@ -479,7 +480,7 @@ std::string ReadWebhookURL() {
 
     std::string txt;
     while (getline(file, txt)) {
-        std::cout << txt << std::endl;
+        //std::cout << txt << std::endl;
     }
 
     file.close();
@@ -498,7 +499,7 @@ std::string ReadSourceURL() {
 
     std::string txt;
     while (getline(file, txt)) {
-        std::cout << txt << std::endl;
+        //std::cout << txt << std::endl;
     }
 
     file.close();

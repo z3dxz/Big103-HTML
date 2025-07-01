@@ -1,16 +1,38 @@
 #include <iostream>
+#include <string>
 #include "window.h"
+#include "big103.h"
 
 int main(int argc, char *argv[]){
 
-    //CreateSFMLWindow();
+    // Initialize Big103
+    
+    Initialize();
 
-    std::cout << "arguments\n";
-    std::cout << argc << "\n";
+    bool ui = true;
+    bool get = false;
+
     int i = 0;
     while (i < argc) {
-        std::cout << "Argument " << i + 1  << ": " << argv[i] << std::endl;
+        if(i == 1) {
+            std::string getstr = "get";
+            if(std::string(argv[i]) == getstr) {
+                ui = false;
+                get = true;
+            }
+        }
+
         i++;
+    }
+
+    if(get) {
+        std::string at, aa;
+        std::string r = request(&at, &aa);
+        std::cout << at << "\n" << aa;
+    }
+
+    if(ui) {
+        CreateSFMLWindow();
     }
 
     return 0;

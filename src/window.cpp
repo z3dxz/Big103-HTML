@@ -180,9 +180,6 @@ int CreateSFMLWindow(){
 
     sf::Clock clock;
 
-    Initialize();
-
-
     float dpi = getDPI();
     std::cout << "Detected DPI: " << dpi << "\n";
     float scale_dpi = ((dpi*100.0f)/96.0f)/100.0f;

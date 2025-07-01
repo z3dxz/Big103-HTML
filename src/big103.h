@@ -9,6 +9,7 @@
 #include <curl/curl.h>
 #include <regex>
 
+std::string request(std::string* atitle, std::string* aartist);
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output);
 bool PushBIG103Iteration(std::string* title, std::string* artist, int* interation, int* ips);
 void Initialize();
