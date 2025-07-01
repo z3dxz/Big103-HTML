@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
     if(get) {
         std::string at, aa;
         std::string r = request(&at, &aa);
-        std::cout << at << "\n" << aa;
+        std::cout << at << " - " << aa;
     }
 
     if(ui) {
