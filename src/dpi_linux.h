@@ -2,7 +2,7 @@
 #include <X11/Xlib.h>
 #include <iostream>
 
-float getDPI() {
+inline float getDPI() {
 
     Display* display = XOpenDisplay(nullptr);
     if (!display) {
