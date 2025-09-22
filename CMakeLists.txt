@@ -15,7 +15,7 @@ configure_file(res/webhookURL.txt webhookURL.txt COPYONLY)
 if (WIN32)
 
 file(GLOB_RECURSE SRC_FILES src/*.cpp "res/Icon.rc")
-add_executable(big103html ${SRC_FILES})
+add_executable(big103html WIN32 ${SRC_FILES})
 target_link_libraries(big103html dwmapi)
 
 else()
