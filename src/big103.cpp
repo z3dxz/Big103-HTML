@@ -1,5 +1,6 @@
 #include "big103.h"
 #include <fstream>
+#include <nlohmann/json.hpp>
 
 // Now handled by CMake linked .txt file for customization
 
@@ -53,13 +54,12 @@ bool isOnBusRide() {
 }
 
 void newsongcomeson(std::string picture);
-const char* WEBHOOKTest = "https://discord.com/api/webhooks/1205359534500085791/aaB2dZt5WsJqFDKPlwYussFN_knYTmIaZ7lk1jvJOZ7E7-N3MA2un2ZDgGtsOcmw78Qv";
 
 void webhook(std::string input, std::string input2, std::string picturefield, const char* webhookurl, bool shouldAppendNotify) {
     CURL* curl;
     CURLcode res;
 
-    bool ping = false;//isOnBusRide();
+    bool ping = isOnBusRide();
 
     if (ping && shouldAppendNotify) {
         input2 += " ||<@!1003695775047495710>||";
@@ -74,30 +74,19 @@ void webhook(std::string input, std::string input2, std::string picturefield, co
     curl = curl_easy_init();
     if (curl) {
         curl_easy_setopt(curl, CURLOPT_URL, webhookurl);
-
-        // create a curl list of header rows:
         struct curl_slist* list = NULL;
-
-        // add Content-Type to the list:
         list = curl_slist_append(list, "Content-Type: application/json");
-
-        // set this list as HTTP headers:
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
-
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content);
-
         res = curl_easy_perform(curl);
-        curl_slist_free_all(list);     // and finally free the list
-
+        curl_slist_free_all(list);
         if (res != CURLE_OK)
             fprintf(stderr, "curl_easy_perform() failed: %s\n",
                 curl_easy_strerror(res));
-
         curl_easy_cleanup(curl);
     }
     curl_global_cleanup();
 }
-
 
 std::string htmlDecode(const std::string& html) {
     std::string decoded;
@@ -166,171 +155,55 @@ bool CheckSongRequirementsY(std::string song) {
 
 
 bool CheckSongRequirements(std::string song) {
-    if (song.find("BIG 103") != std::string::npos) {
-        return false;
-    }
-    if (song.find("Free Consult") != std::string::npos) {
-        return false;
-    }
     if (CheckIfRecent(song)) {
         return false;
     }
     return true;
 }
-
-
-std::string makeAlphanumeric(const std::string& input) {
-    std::string result;
-    for (char c : input) {
-        if (isalnum(c) || c == ' ') {
-            if (c == ' ') {
-                result += '+';
-            }
-            else {
-                result += c;
-            }
-        }
-    }
-    return result;
-}
-
-
-std::string replaceSpacesWithPlus(std::string str) {
-    for (int i = 0; i < str.length(); ++i) {
-        if (str[i] == ' ') {
-            str[i] = '+';
-        }
-    }
-    return str;
-}
-
-std::string convertNonAlphanumericToPluses(const std::string& input) {
-    std::string result = input;
-    for (char& c : result) {
-        if (!isalnum(c) && c != ' ') {
-            c = '+';
-        }
-    }
-    return result;
-}
-
-std::string getyear(std::string song) {
-
-    CURL* curl = curl_easy_init();
-    std::string numbers = "0000";
-    if (curl) {
-
-        std::string k = "https://www.google.com/search?q=";
-        std::string f = k + "What+Year+Was+" + makeAlphanumeric(song);
-        const char* url = f.c_str();
-
-        // Initialize a string to store the received HTML
-        std::string html;
-
-        // Set the URL to fetch
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-
-        // Set the write callback function
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
-
-        // Perform the request
-        CURLcode res = curl_easy_perform(curl);
-
-        std::regex pattern("BNeawe iBp4i AP7Wnd\">\\d{4}"); // Match "lala" followed by four digits
-
-        std::smatch match;
-        if (std::regex_search(html, match, pattern)) {
-            std::string lalaWithNumbers = match[0];
-            numbers = lalaWithNumbers.substr(21); // Get the four numbers
-        }
-
-        curl_easy_cleanup(curl);
-    }
-    curl_global_cleanup();
-    return numbers;
-}
-
-
-
 std::string request(std::string* atitle, std::string* aartist) {
 
-
     CURL* curl = curl_easy_init();
-    if (curl) {
-
-        int randomNumber = std::rand();
-        
-        std::string randomString = std::to_string(randomNumber);
-        if(sourceURL == "ERROR" || sourceURL == "Undefined" || sourceURL == "") {
-            std::cout << "There is an error with the source URL: Error: " << sourceURL << "\n";
-        }
-        std::string f = sourceURL + "?" + randomString;
-        const char* url = f.c_str();
-
-        // Initialize a string to store the received HTML
-        std::string html;
-
-        // Set the URL to fetch
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-
-        // Set the write callback function
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
-
-        // Perform the request
-        CURLcode res = curl_easy_perform(curl);
-
-        std::string title;
-        std::string artist;
-
-        {
-            std::string searchString = "now playing";
-            std::string startTag = "<h3>";
-            std::string endTag = "</h3>";
-
-            size_t startPos = html.find(searchString);
-            if (startPos != std::string::npos) {
-                size_t h3Pos = html.find(startTag, startPos);
-                if (h3Pos != std::string::npos) {
-                    size_t endPos = html.find(endTag, h3Pos);
-                    if (endPos != std::string::npos) {
-                        std::string result = html.substr(h3Pos + 4, endPos - h3Pos + endTag.length() - 9);
-                        title = result;
-                    }
-                }
-            }
-        }
-
-        {
-
-            std::string searchString = "now playing";
-            std::string startTag = "<span>";
-            std::string endTag = "</span>";
-
-            size_t startPos = html.find(searchString);
-            if (startPos != std::string::npos) {
-                size_t h3Pos = html.find(startTag, startPos);
-                if (h3Pos != std::string::npos) {
-                    size_t endPos = html.find(endTag, h3Pos);
-                    if (endPos != std::string::npos) {
-                        std::string result = html.substr(h3Pos + 6, endPos - h3Pos + endTag.length() - 13);
-                        artist = result;
-                    }
-                }
-            }
-        }
-
-        std::string decodedTitle = htmlDecode(title);
-        std::string decodedArtist = htmlDecode(artist);
-
-        *atitle = decodedTitle;
-        *aartist = decodedArtist;
-
-        curl_easy_cleanup(curl);
-        curl_global_cleanup();
-        return "**" + decodedTitle + "** \\u00B7 " + decodedArtist;
+    if(!curl) return "Curl not initialized";
+    
+    if(sourceURL == "ERROR" || sourceURL == "Undefined" || sourceURL == "") {
+        std::cout << "There is an error with the source URL: Error: " << sourceURL << "\n";
     }
+
+    std::string surl = sourceURL + "&t=" + std::to_string(std::time(nullptr));
+    const char* url = surl.c_str();
+
+    std::string content;
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &content);
+
+    // Perform the request
+    CURLcode res = curl_easy_perform(curl);
+
+    std::string title = "Title";
+    std::string artist = "Artist";
+
+    try {
+    nlohmann::json data = nlohmann::json::parse(content);
+
+    auto& firstPerf = data["performances"][0];
+
+    title = firstPerf["title"];
+    artist = firstPerf["artist"];
+    
+    } catch (nlohmann::json::parse_error& e) {
+        return "JSON Error";
+    } catch (nlohmann::json::type_error& e) {
+        return "JSON Error";
+    }
+
+    *atitle = title;
+    *aartist = artist;
+
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    return "**" + title + "** \\u00B7 " + artist;
 
     curl_global_cleanup();
     return "Not Found";
@@ -341,56 +214,44 @@ std::string request(std::string* atitle, std::string* aartist) {
 std::string requestforpicture() {
 
     CURL* curl = curl_easy_init();
-    if (curl) {
-
-        int randomNumber = std::rand();
-        std::string randomString = std::to_string(randomNumber);
-        if(sourceURL == "ERROR" || sourceURL == "Undefined" || sourceURL == "") {
-            std::cout << "There is an error with the source URL: Error: " << sourceURL << "\n";
-        }
-        std::string k = sourceURL;
-        std::string f = k + + "?" + randomString;
-        const char* url = f.c_str();
-
-        // Initialize a string to store the received HTML
-        std::string html;
-
-        // Set the URL to fetch
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-
-        // Set the write callback function
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
-
-        // Perform the request
-        CURLcode res = curl_easy_perform(curl);
-
-        std::string picture;
-
-        {
-            std::string searchString = "now playing";
-            std::string startTag = "<img src=\"";
-            std::string endTag = "\" alt";
-
-            size_t startPos = html.find(searchString);
-            if (startPos != std::string::npos) {
-                size_t h3Pos = html.find(startTag, startPos);
-                if (h3Pos != std::string::npos) {
-                    size_t endPos = html.find(endTag, h3Pos);
-                    if (endPos != std::string::npos) {
-                        std::string result = html.substr(h3Pos + 10, endPos - h3Pos + endTag.length() - 15);
-                        picture = result;
-                    }
-                }
-            }
-        }
-
-        curl_easy_cleanup(curl);
-        curl_global_cleanup();
-        return picture;
+    if(!curl) return "Curl not initialized";
+    
+    if(sourceURL == "ERROR" || sourceURL == "Undefined" || sourceURL == "") {
+        std::cout << "There is an error with the source URL: Error: " << sourceURL << "\n";
     }
-    curl_global_cleanup();
 
+    std::string surl = sourceURL + "&t=" + std::to_string(std::time(nullptr));
+    const char* url = surl.c_str();
+
+    std::string content;
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &content);
+
+    // Perform the request
+    CURLcode res = curl_easy_perform(curl);
+
+    std::string picture = "";
+
+    try {
+    nlohmann::json data = nlohmann::json::parse(content);
+
+    auto& firstPerf = data["performances"][0];
+
+    picture = firstPerf["mediumimage"];
+    
+    } catch (nlohmann::json::parse_error& e) {
+        return "JSON Error";
+    } catch (nlohmann::json::type_error& e) {
+        return "JSON Error";
+    }
+
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    return picture;
+
+    curl_global_cleanup();
     return "Not Found";
 }
 
@@ -521,15 +382,12 @@ bool PushBIG103Iteration(std::string* title, std::string* artist, int* iteration
         return 0;
     }
 
-
     //||<@!1003695775047495710>||
     if (k0 != testlast) {
         picture = requestforpicture();
         newsongcomeson(picture);
-        webhook("BIG103", k0, "", WEBHOOKTest, false);
         testlast = k0;
     }
-
 
     if (CheckSongRequirements(k0)) {
         k = k0;
@@ -538,7 +396,7 @@ bool PushBIG103Iteration(std::string* title, std::string* artist, int* iteration
         requestDone = false;
     }
 
-    if (!requestDone && ips0 > 2) {
+    if (!requestDone) {
         //Beep(500, 500);
         if (CheckSongRequirementsY(k0)) {
             if (k.find("52") != std::string::npos) {
@@ -574,13 +432,8 @@ bool PushBIG103Iteration(std::string* title, std::string* artist, int* iteration
                 didPlay = true;
             }
 
-            std::string year = getyear(std::string(*artist + *title));
-            std::string req = "*" + year + "* | " + k;
-            std::string titlefield = *title + " \\u00B7 " + year;
-
-            if (year == "0000") {
-                titlefield = *title;
-            }
+            std::string req = k;
+            std::string titlefield = *title + " \\u00B7";
 
             std::string artistfield = *artist;
 

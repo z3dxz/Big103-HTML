@@ -77,21 +77,26 @@ const std::string bkShader = R"(
 
 )";
 
+void write_to_vector(void* context, void* data, int size) {
+    auto* v = static_cast<std::vector<uint8_t>*>(context);
+    auto* bytes = static_cast<uint8_t*>(data);
+    v->insert(v->end(), bytes, bytes + size);
+}
+
 bool load_album_art(const std::string& url, sf::Texture& texture) {
     CURL* curl;
     CURLcode res;
-    std::string imageData; // Using std::string to hold binary image data
+    std::string imageData;
 
-    // Initialize cURL
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if (curl) {
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &imageData);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // Follow redirects
 
-        // Perform the request
         res = curl_easy_perform(curl);
         if (res != CURLE_OK) {
             std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
@@ -102,10 +107,8 @@ bool load_album_art(const std::string& url, sf::Texture& texture) {
         curl_easy_cleanup(curl);
     }
 
-    // Clean up cURL global environment
     curl_global_cleanup();
 
-    // Load image data into texture from std::string
     if (texture.loadFromMemory(imageData.data(), imageData.size())) {
         return true;
     }
@@ -121,7 +124,6 @@ void newsongcomeson(std::string picture) {
     bool st = load_album_art(picture, *a_art);
     if (st) {;
         albumart.setTexture(a_art);
-
     }
 }
 

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <thread>
+#include "lib/stb_image.h"
+#include "lib/stb_image_write.h"
 
 #include "big103.h"
 

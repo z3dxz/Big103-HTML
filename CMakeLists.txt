@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(big103html VERSION 2.0)
 
 find_package(SFML COMPONENTS network audio graphics window system REQUIRED)
+find_package(nlohmann_json REQUIRED)
 find_package(CURL REQUIRED)
 
 configure_file(res/CascadiaCode.ttf font.ttf COPYONLY)
@@ -27,4 +28,4 @@ add_executable(big103html ${SRC_FILES})
 target_link_libraries(big103html ${X11_LIBRARIES})
 
 endif()
-target_link_libraries(big103html sfml-network sfml-audio sfml-graphics sfml-window sfml-system CURL::libcurl)
+target_link_libraries(big103html sfml-network sfml-audio sfml-graphics sfml-window sfml-system CURL::libcurl nlohmann_json::nlohmann_json)
