@@ -19,7 +19,6 @@ int plays1 = 0;
 
 void ExecuteThread() {
     while (isRunning) {
-        // Your thread's work here.
         std::string xtitle = "Song Title";
         std::string xartist = "Song Artist";
         int iterations = 0;
@@ -95,7 +94,7 @@ bool load_album_art(const std::string& url, sf::Texture& texture) {
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &imageData);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // Follow redirects
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
         res = curl_easy_perform(curl);
         if (res != CURLE_OK) {
@@ -138,7 +137,6 @@ int CreateSFMLWindow(){
 
     sf::RenderWindow window(sf::VideoMode(defwidth, defheight), title.c_str(), sf::Style::Default);
    
-    
 	// Poll Events
 	#ifdef _WIN32
 	SetTitlebarDark(window);
@@ -201,8 +199,10 @@ int CreateSFMLWindow(){
             switch (event.type) {
             case sf::Event::Closed: {
 
-                window.close();
-                std::exit(0);
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Comma)) {
+                    window.close();
+                    std::exit(0);
+                }
                 break;
             }
             case sf::Event::Resized: {
@@ -233,7 +233,8 @@ int CreateSFMLWindow(){
 
         window.display();
     }
-    th.join(); // Wait for the thread to finish
+
+    th.join();
 
     delete a_art;
 	return 0;

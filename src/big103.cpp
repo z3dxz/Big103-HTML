@@ -37,15 +37,15 @@ bool isOnBusRide() {
 
     if (!isWednesday) {
         // Regular schedule
-        if ((hour == 6 && minute >= 45) || (hour == 7 && minute <= 34) ||
+        if ((hour == 6 && minute >= 41) || (hour == 7 && minute <= 34) ||
             ((hour == 14 && minute >= 30) || (hour == 15 && minute <= 20))&&(!isTuesday)) {
             return true;
         }
     }
     else {
         // Late Start
-        if ((hour == 7 && minute >= 45) || (hour == 8 && minute <= 34) ||
-            (hour == 14 && minute >= 30) || (hour == 15 && minute <= 20)) {
+        if ((hour == 7 && minute >= 41) || (hour == 8 && minute <= 34) /*||
+            (hour == 14 && minute >= 30) || (hour == 15 && minute <= 20)*/) {
             return true;
         }
     }
@@ -59,7 +59,7 @@ void webhook(std::string input, std::string input2, std::string picturefield, co
     CURL* curl;
     CURLcode res;
 
-    bool ping = isOnBusRide();
+    bool ping = false;//isOnBusRide();
 
     if (ping && shouldAppendNotify) {
         input2 += " ||<@!1003695775047495710>||";
@@ -88,78 +88,6 @@ void webhook(std::string input, std::string input2, std::string picturefield, co
     curl_global_cleanup();
 }
 
-std::string htmlDecode(const std::string& html) {
-    std::string decoded;
-    size_t pos = 0;
-    while (pos < html.length()) {
-        size_t ampPos = html.find('&', pos);
-        if (ampPos == std::string::npos) {
-            decoded += html.substr(pos);
-            break;
-        }
-        decoded += html.substr(pos, ampPos - pos);
-        size_t semicolonPos = html.find(';', ampPos);
-        if (semicolonPos != std::string::npos) {
-            std::string entity = html.substr(ampPos, semicolonPos - ampPos + 1);
-            if (entity == "&amp;") {
-                decoded += '&';
-            }
-            else if (entity == "&apos;") {
-                decoded += '\'';
-            }
-            else if (entity == "&quot;") {
-                decoded += '"';
-            }
-            else if (entity == "&lt;") {
-                decoded += '<';
-            }
-            else if (entity == "&gt;") {
-                decoded += '>';
-            }
-            else {
-                // Handle other entities as needed
-                decoded += entity;
-            }
-            pos = semicolonPos + 1;
-        }
-        else {
-            decoded += html.substr(pos);  // If no ending semicolon, treat it as text
-            break;
-        }
-    }
-    return decoded;
-}
-
-std::vector<std::string> arr;
-
-void AppendSong(std::string song) {
-    arr.push_back(song);
-    if (arr.size() > 20) {
-        arr.erase(arr.begin());
-    }
-}
-
-bool CheckIfRecent(std::string song) {
-    return (std::find(arr.begin(), arr.end(), song) != arr.end());
-}
-
-bool CheckSongRequirementsY(std::string song) {
-    if (song.find("BIG 103") != std::string::npos) {
-        return false;
-    }
-    if (song.find("Free Consult") != std::string::npos) {
-        return false;
-    }
-    return true;
-}
-
-
-bool CheckSongRequirements(std::string song) {
-    if (CheckIfRecent(song)) {
-        return false;
-    }
-    return true;
-}
 std::string request(std::string* atitle, std::string* aartist) {
 
     CURL* curl = curl_easy_init();
@@ -389,16 +317,26 @@ bool PushBIG103Iteration(std::string* title, std::string* artist, int* iteration
         testlast = k0;
     }
 
-    if (CheckSongRequirements(k0)) {
-        k = k0;
-        ips0 = 0;
-        AppendSong(k);
-        requestDone = false;
-    }
+    k = k0;
+    ips0 = 0;
+    requestDone = false;
 
     if (!requestDone) {
-        //Beep(500, 500);
-        if (CheckSongRequirementsY(k0)) {
+        std::string req = k;
+        std::string titlefield = *title + " \\u00B7";
+
+        std::string artistfield = *artist;
+
+        size_t found = artistfield.find(", ");
+        while (found != std::string::npos) {
+            artistfield.replace(found, 2, "-");
+            found = artistfield.find(", ");
+        }
+        if (titlefield != last) {
+            if (k.find("Blues T") != std::string::npos) {
+                notifykind();
+                didPlay = true;
+            }
             if (k.find("52") != std::string::npos) {
                 notify();
                 didPlay = true;
@@ -419,10 +357,6 @@ bool PushBIG103Iteration(std::string* title, std::string* artist, int* iteration
                 notifykind();
                 didPlay = true;
             }
-            if (k.find("Buggles") != std::string::npos) {
-                notifykind();
-                didPlay = true;
-            }
             if ((k.find("Yes") != std::string::npos) && (!((k.find("Owner") != std::string::npos)))) {
                 notify();
                 didPlay = true;
@@ -431,33 +365,19 @@ bool PushBIG103Iteration(std::string* title, std::string* artist, int* iteration
                 notify();
                 didPlay = true;
             }
+            if(!CheckIfSongIsInFile(k)) {
+                std::cout << "Logging..";
 
-            std::string req = k;
-            std::string titlefield = *title + " \\u00B7";
-
-            std::string artistfield = *artist;
-
-            size_t found = artistfield.find(", ");
-            while (found != std::string::npos) {
-                artistfield.replace(found, 2, "-");
-                found = artistfield.find(", ");
-            }
-            if (titlefield != last) {
-                if(!CheckIfSongIsInFile(k)) {
-                    std::cout << "Logging..";
-
-                    if(webhookURL == "ERROR" || webhookURL == "Undefined" || webhookURL == "") {
-                        std::cout << "There is an error with the webhook URL: Error: " << sourceURL << "\n";
-                    }
-
-                    webhook(titlefield, artistfield, picture, webhookURL.c_str(), true);
+                if(webhookURL == "ERROR" || webhookURL == "Undefined" || webhookURL == "") {
+                    std::cout << "There is an error with the webhook URL: Error: " << sourceURL << "\n";
                 }
-                SongToFile(k);
-                last = titlefield;
-            }
-            requestDone = true;
-        }
 
+                webhook(titlefield, artistfield, picture, webhookURL.c_str(), true);
+            }
+            SongToFile(k);
+            last = titlefield;
+        }
+        requestDone = true;
     }
 
     iter++; ips0++;

@@ -11,7 +11,7 @@ find_package(CURL REQUIRED)
 configure_file(res/CascadiaCode.ttf font.ttf COPYONLY)
 configure_file(res/babafixed.wav babafixed.wav COPYONLY)
 configure_file(res/sourceURL.txt sourceURL.txt COPYONLY)
-configure_file(res/webhookURL.txt webhookURL.txt COPYONLY)
+configure_file(wh/webhookURL.txt webhookURL.txt COPYONLY)
 
 if (WIN32)
 
